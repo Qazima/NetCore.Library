@@ -9,30 +9,14 @@ using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Json {
     public class JsonReadOnly<ListObjectType, ObjectType> : IAction where ListObjectType : IEnumerable<ObjectType> {
-        /// <summary>
-        /// Event handler for the Get action
-        /// </summary>
         public event EventHandler<ActionGetEventArgs> OnActionGet;
 
-        /// <summary>
-        /// Object to parse
-        /// </summary>
         protected ListObjectType Item { get; set; }
 
-        /// <summary>
-        /// Constructor of a json action read only
-        /// </summary>
-        /// <param name="item">item to parse</param>
         public JsonReadOnly(ListObjectType item) {
             Item = item;
         }
 
-        /// <summary>
-        /// Process the current context
-        /// </summary>
-        /// <param name="context">Context to process</param>
-        /// <param name="rawUrl">Raw url without the mount point</param>
-        /// <returns>True if handled, else false</returns>
         public virtual bool Process(HttpListenerContext context, string rawUrl) {
             bool result = false;
             switch (context.Request.HttpMethod.ToUpper()) {
@@ -47,19 +31,10 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return result;
         }
 
-        /// <summary>
-        /// Fire event on an action
-        /// </summary>
-        /// <param name="e">Event arguments</param>
         protected virtual void OnGetAction(ActionGetEventArgs e) {
             OnActionGet?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// Generate Json flux from the collection
-        /// </summary>
-        /// <param name="context">Context to process</param>
-        /// <returns>True if handled, else false</returns>
         protected bool ProcessGet(HttpListenerContext context) {
             ActionGetEventArgs eventArgs = new ActionGetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
@@ -77,11 +52,6 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return result;
         }
 
-        /// <summary>
-        /// Generate head flux
-        /// </summary>
-        /// <param name="context">Context to process</param>
-        /// <returns>True if handled, else false</returns>
         protected bool ProcessHead(HttpListenerContext context) {
             try {
                 DateTime currDate = DateTime.Now;
@@ -105,10 +75,6 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return true;
         }
 
-        /// <summary>
-        /// Prepare reponse
-        /// </summary>
-        /// <param name="context">Context to process</param>
         protected void PrepareResponse(HttpListenerContext context) {
             IEnumerable<ObjectType> filteredItems = Item;
             List<string> keys = context.Request.QueryString.AllKeys.ToList();

@@ -17,11 +17,6 @@ namespace Com.Qazima.NetCore.Library.Http.Action {
 
         public Dictionary<HttpStatusCode, string> HttpStatusPages { get; }
 
-        /// <summary>
-        /// Process the 404 Error code
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <returns>True if every thing was fine</returns>
         protected bool ProcessError(HttpListenerContext context, HttpStatusCode statusCode) {
             byte[] buffer;
             DateTime creationTime;
@@ -45,11 +40,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action {
             }
             return ProcessError(context, statusCode, buffer, contentType, creationTime, lastWriteTime);
         }
-        /// <summary>
-        /// Process the 404 Error code
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <returns>True if every thing was fine</returns>
+
         protected bool ProcessError(HttpListenerContext context, HttpStatusCode statusCode, byte[] buffer, string contentType, DateTime creationTime, DateTime lastWriteTime) {
             bool result = true;
             //Adding permanent http response headers

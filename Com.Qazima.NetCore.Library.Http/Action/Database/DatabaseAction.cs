@@ -10,43 +10,22 @@ using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Database {
     public class DatabaseAction : Action, IDatabaseAction {
-        /// <summary>
-        /// Event handler for the Get action
-        /// </summary>
         public event EventHandler<ActionGetEventArgs> OnActionGet;
 
-        /// <summary>
-        /// Event handler for the Delete action
-        /// </summary>
         public event EventHandler<ActionDeleteEventArgs<string>> OnActionDelete;
 
-        /// <summary>
-        /// Event handler for the Post action
-        /// </summary>
         public event EventHandler<ActionPostEventArgs<string>> OnActionPost;
 
-        /// <summary>
-        /// Event handler for the Put action
-        /// </summary>
         public event EventHandler<ActionPutEventArgs<string>> OnActionPut;
 
-        /// <summary>
-        /// The connection string to the database
-        /// </summary>
         public string ConnectionString { get; set; }
 
-        /// <summary>
-        /// The list of schemas
-        /// </summary>
         public List<Schema> Schemas { get; set; }
 
         public string SqlUrl { get; set; }
 
         public string TableUrl { get; set; }
 
-        /// <summary>
-        /// Have to expose the list of schemas
-        /// </summary>
         public bool ExposeDataModel { get; set; }
 
         public virtual DbCommand GetCommand(string cmdText, DbConnection dbConnection) {
@@ -193,12 +172,6 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
         }
 
         #region Get
-        /// <summary>
-        /// Process the get of the current context
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <param name="rawUrl">Raw url</param>
-        /// <returns>True if every thing was fine</returns>
         public bool ProcessGet(HttpListenerContext context, string rawUrl) {
             if (rawUrl.EndsWith("/")) {
                 rawUrl = rawUrl.Substring(0, rawUrl.Length - 1);
@@ -220,19 +193,10 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
             return result;
         }
 
-        /// <summary>
-        /// Fire event on an action
-        /// </summary>
-        /// <param name="e">Event arguments</param>
         protected virtual void OnGetAction(ActionGetEventArgs e) {
             OnActionGet?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// Get the schemas
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <returns>True if every thing was fine</returns>
         protected bool ProcessGetSchema(HttpListenerContext context) {
             ActionGetEventArgs eventArgs = new ActionGetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
@@ -267,126 +231,57 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
             return result;
         }
 
-        /// <summary>
-        /// Get the result of a sql query
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <param name="sqlQuery">Sql query</param>
-        /// <returns>True if every thing was fine</returns>
         protected virtual bool ProcessGetSql(HttpListenerContext context, string sqlQuery) {
             return true;
         }
 
-        /// <summary>
-        /// Get the contents of a table or a view
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <param name="objectName">Table or view name</param>
-        /// <param name="catalogName">Catalog name</param>
-        /// <returns>True if every thing was fine</returns>
         protected virtual bool ProcessGetTable(HttpListenerContext context, string objectName, string catalogName) {
             return true;
         }
         #endregion Get
 
         #region Post
-        /// <summary>
-        /// Process the post of the current context
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <param name="rawUrl">Raw url</param>
-        /// <returns>True if every thing was fine</returns>
         public virtual bool ProcessPost(HttpListenerContext context, string rawUrl) {
             return true;
         }
 
-        /// <summary>
-        /// Insert into a table or a view
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <param name="objectName">Table or view name</param>
-        /// <param name="catalogName">Catalog name</param>
-        /// <returns>True if every thing was fine</returns>
         protected virtual bool ProcessPostTable(HttpListenerContext context, string objectName, string catalogName) {
             return true;
         }
 
-        /// <summary>
-        /// Fire event on an action
-        /// </summary>
-        /// <param name="e">Event arguments</param>
         protected virtual void OnPostAction(ActionPostEventArgs<string> e) {
             OnActionPost?.Invoke(this, e);
         }
         #endregion Post
 
         #region Put
-        /// <summary>
-        /// Process the put of the current context
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <param name="rawUrl">Raw url</param>
-        /// <returns>True if every thing was fine</returns>
         public virtual bool ProcessPut(HttpListenerContext context, string rawUrl) {
             return true;
         }
 
-        /// <summary>
-        /// Update a table or a view
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <param name="objectName">Table or view name</param>
-        /// <param name="catalogName">Catalog name</param>
-        /// <returns>True if every thing was fine</returns>
         protected virtual bool ProcessPutTable(HttpListenerContext context, string objectName, string catalogName) {
             return true;
         }
 
-        /// <summary>
-        /// Fire event on an action
-        /// </summary>
-        /// <param name="e">Event arguments</param>
         protected virtual void OnPutAction(ActionPutEventArgs<string> e) {
             OnActionPut?.Invoke(this, e);
         }
         #endregion Put
 
         #region Delete
-        /// <summary>
-        /// Process the delete of the current context
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <param name="rawUrl">Raw url</param>
-        /// <returns>True if every thing was fine</returns>
         public virtual bool ProcessDelete(HttpListenerContext context, string rawUrl) {
             return true;
         }
 
-        /// <summary>
-        /// Delete from a table or a view
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <param name="objectName">Table or view name</param>
-        /// <param name="catalogName">Catalog name</param>
-        /// <returns>True if every thing was fine</returns>
         protected virtual bool ProcessDeleteTable(HttpListenerContext context, string objectName, string catalogName) {
             return true;
         }
 
-        /// <summary>
-        /// Fire event on an action
-        /// </summary>
-        /// <param name="e">Event arguments</param>
         protected virtual void OnDeleteAction(ActionDeleteEventArgs<string> e) {
             OnActionDelete?.Invoke(this, e);
         }
         #endregion Delete
 
-        /// <summary>
-        /// Process the 404 Error code
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <returns>True if every thing was fine</returns>
         protected bool Process404(HttpListenerContext context) {
             return ProcessError(context, HttpStatusCode.NotFound);
         }

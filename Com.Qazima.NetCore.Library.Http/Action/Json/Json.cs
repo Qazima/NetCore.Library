@@ -8,33 +8,14 @@ using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Json {
     public class Json<ListObjectType, ObjectType> : JsonReadOnly<ListObjectType, ObjectType> where ListObjectType : IList<ObjectType> {
-        /// <summary>
-        /// Event handler for the Delete action
-        /// </summary>
         public event EventHandler<ActionDeleteEventArgs<ObjectType>> OnActionDelete;
 
-        /// <summary>
-        /// Event handler for the Post action
-        /// </summary>
         public event EventHandler<ActionPostEventArgs<ObjectType>> OnActionPost;
 
-        /// <summary>
-        /// Event handler for the Put action
-        /// </summary>
         public event EventHandler<ActionPutEventArgs<ObjectType>> OnActionPut;
 
-        /// <summary>
-        /// Constructor of a json action
-        /// </summary>
-        /// <param name="item">item to parse</param>
         public Json(ListObjectType item) : base(item) { }
 
-        /// <summary>
-        /// Process the current context
-        /// </summary>
-        /// <param name="context">Context to process</param>
-        /// <param name="rawUrl">Raw url without the mount point</param>
-        /// <returns>True if handled, else false</returns>
         public override bool Process(HttpListenerContext context, string rawUrl) {
             bool result = false;
             switch (context.Request.HttpMethod.ToUpper()) {
@@ -58,35 +39,18 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return result;
         }
 
-        /// <summary>
-        /// Fire event on an action
-        /// </summary>
-        /// <param name="e">Event arguments</param>
         protected virtual void OnDeleteAction(ActionDeleteEventArgs<ObjectType> e) {
             OnActionDelete?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// Fire event on an action
-        /// </summary>
-        /// <param name="e">Event arguments</param>
         protected virtual void OnPostAction(ActionPostEventArgs<ObjectType> e) {
             OnActionPost?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// Fire event on an action
-        /// </summary>
-        /// <param name="e">Event arguments</param>
         protected virtual void OnPutAction(ActionPutEventArgs<ObjectType> e) {
             OnActionPut?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// Generate object from Json flux and add it to the collection
-        /// </summary>
-        /// <param name="context">Context to process</param>
-        /// <returns>True if handled, else false</returns>
         protected bool ProcessPost(HttpListenerContext context) {
             ActionPostEventArgs<ObjectType> eventArgs = new ActionPostEventArgs<ObjectType>() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
@@ -130,11 +94,6 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return result;
         }
 
-        /// <summary>
-        /// Generate object from Json flux and replace the old one (based on fields with primary key attribute) with the new one
-        /// </summary>
-        /// <param name="context">Context to process</param>
-        /// <returns>True if handled, else false</returns>
         protected bool ProcessPut(HttpListenerContext context) {
             ActionPutEventArgs<ObjectType> eventArgs = new ActionPutEventArgs<ObjectType>() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
@@ -185,11 +144,6 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return result;
         }
 
-        /// <summary>
-        /// Delete object from collection (based on id)
-        /// </summary>
-        /// <param name="context">Context to process</param>
-        /// <returns>True if handled, else false</returns>
         protected bool ProcessDelete(HttpListenerContext context) {
             ActionDeleteEventArgs<ObjectType> eventArgs = new ActionDeleteEventArgs<ObjectType>() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;

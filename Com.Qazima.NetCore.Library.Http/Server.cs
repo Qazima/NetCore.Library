@@ -8,44 +8,20 @@ using System.Threading;
 
 namespace Com.Qazima.NetCore.Library.Http {
     public class Server {
-        /// <summary>
-        /// Differents actions
-        /// </summary>
         private Dictionary<string, IAction> Actions { get; set; }
 
-        /// <summary>
-        /// Server thread
-        /// </summary>
         private Thread ServerThread;
 
-        /// <summary>
-        /// Http Listener
-        /// </summary>
         private HttpListener Listener { get; set; }
 
-        /// <summary>
-        /// Listening port
-        /// </summary>
         public int ListeningPort { get; set; }
 
-        /// <summary>
-        /// Listening url or ip address
-        /// </summary>
         public string ListeningUrl { get; set; }
 
-        /// <summary>
-        /// Construct server with given port.
-        /// </summary>
-        /// <param name="url">Url of the server</param>
-        /// <param name="port">Port of the server</param>
         public Server(string url, int port) {
             Initialize(url, port);
         }
 
-        /// <summary>
-        /// Construct server with suitable port.
-        /// </summary>
-        /// <param name="url">Url of the server</param>
         public Server(string url) {
             //get an empty port
             TcpListener l = new TcpListener(IPAddress.Loopback, 0);
@@ -55,11 +31,6 @@ namespace Com.Qazima.NetCore.Library.Http {
             Initialize(url, port);
         }
 
-        /// <summary>
-        /// Initialize
-        /// </summary>
-        /// <param name="url">Url of the server</param>
-        /// <param name="port">Port of the server</param>
         private void Initialize(string url, int port) {
             ListeningUrl = url;
             ListeningPort = port;
@@ -67,11 +38,6 @@ namespace Com.Qazima.NetCore.Library.Http {
             ServerThread = new Thread(Listen);
         }
 
-        /// <summary>
-        /// Add an action
-        /// </summary>
-        /// <param name="directory"></param>
-        /// <param name="action"></param>
         public void AddAction(string directory, IAction action) {
             if (!directory.EndsWith("/")) {
                 directory += "/";
@@ -80,24 +46,15 @@ namespace Com.Qazima.NetCore.Library.Http {
             Actions.Add(directory, action);
         }
 
-        /// <summary>
-        /// Start server
-        /// </summary>
         public void Start() {
             ServerThread.Start();
         }
 
-        /// <summary>
-        /// Stop server and dispose all functions.
-        /// </summary>
         public void Stop() {
             ServerThread.Abort();
             Listener.Stop();
         }
 
-        /// <summary>
-        /// Start the web server
-        /// </summary>
         private void Listen() {
             Listener = new HttpListener();
             Listener.Prefixes.Add("http://" + ListeningUrl + ":" + ListeningPort + "/");
@@ -111,10 +68,6 @@ namespace Com.Qazima.NetCore.Library.Http {
             }
         }
 
-        /// <summary>
-        /// Process the current context with actions
-        /// </summary>
-        /// <param name="context">Context to process</param>
         private void Process(HttpListenerContext context) {
             try {
                 if (!ProcessRawUrl(context.Request.RawUrl, context)) {
@@ -127,12 +80,6 @@ namespace Com.Qazima.NetCore.Library.Http {
             }
         }
 
-        /// <summary>
-        /// Process the current context with actions
-        /// </summary>
-        /// <param name="path">Requested path</param>
-        /// <param name="context">Context to process</param>
-        /// <returns>True if handled, else false</returns>
         private bool ProcessRawUrl(string path, HttpListenerContext context) {
             if (!path.EndsWith("/")) {
                 path += "/";

@@ -139,29 +139,14 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
             return false;
         }
 
-        /// <summary>
-        /// Process the 404 Error code
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <returns>True if every thing was fine</returns>
         private bool Process404(HttpListenerContext context) {
             return ProcessError(context, HttpStatusCode.NotFound);
         }
 
-        /// <summary>
-        /// Process the 404 Error code
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <returns>True if every thing was fine</returns>
         private bool Process403(HttpListenerContext context) {
             return ProcessError(context, HttpStatusCode.Forbidden);
         }
 
-        /// <summary>
-        /// Process the 404 Error code
-        /// </summary>
-        /// <param name="context">Current context</param>
-        /// <returns>True if every thing was fine</returns>
         private bool Process500(HttpListenerContext context, Exception e) {
             byte[] buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(e).ToCharArray());
             DateTime currDate = DateTime.Now;
