@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
-    public class Directory : Generic{
+    public class Directory : Action{
         public bool AllowCreate { get; set; }
 
         public bool AllowExplore { get; set; }

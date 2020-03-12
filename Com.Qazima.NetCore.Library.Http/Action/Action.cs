@@ -6,8 +6,8 @@ using System.Net;
 using System.Text;
 
 namespace Com.Qazima.NetCore.Library.Http.Action {
-    public abstract class Generic : IAction {
-        public Generic() {
+    public abstract class Action : IAction {
+        public Action() {
             HttpStatusPages = new Dictionary<HttpStatusCode, string>();
         }
 
@@ -23,15 +23,26 @@ namespace Com.Qazima.NetCore.Library.Http.Action {
         /// <param name="context">Current context</param>
         /// <returns>True if every thing was fine</returns>
         protected bool ProcessError(HttpListenerContext context, HttpStatusCode statusCode) {
-            string filePath = HttpStatusPages[statusCode];
-            byte[] buffer = File.ReadAllBytes(filePath);
-            FileInfo fileInfo = new FileInfo(filePath);
+            byte[] buffer;
+            DateTime creationTime;
+            DateTime lastWriteTime;
             string contentType;
-            if (!new FileExtensionContentTypeProvider().TryGetContentType(filePath, out contentType)) {
+            if (HttpStatusPages.ContainsKey(statusCode)) {
+                string filePath = HttpStatusPages[statusCode];
+                buffer = File.ReadAllBytes(filePath);
+                FileInfo fileInfo = new FileInfo(filePath);
+                creationTime = fileInfo.CreationTime;
+                lastWriteTime = fileInfo.LastWriteTime;
+                if (!new FileExtensionContentTypeProvider().TryGetContentType(filePath, out contentType)) {
+                    contentType = "application/octet-stream";
+                }
+            } else {
+                buffer = Encoding.UTF8.GetBytes(" ");
+                DateTime currDate = DateTime.Now;
+                creationTime = currDate;
+                lastWriteTime = currDate;
                 contentType = "application/octet-stream";
             }
-            DateTime creationTime = fileInfo.CreationTime;
-            DateTime lastWriteTime = fileInfo.LastWriteTime;
             return ProcessError(context, statusCode, buffer, contentType, creationTime, lastWriteTime);
         }
         /// <summary>
@@ -39,10 +50,10 @@ namespace Com.Qazima.NetCore.Library.Http.Action {
         /// </summary>
         /// <param name="context">Current context</param>
         /// <returns>True if every thing was fine</returns>
-        protected bool ProcessError(HttpListenerContext context, HttpStatusCode statusCode, byte[] buffer, string mimeType, DateTime creationTime, DateTime lastWriteTime) {
+        protected bool ProcessError(HttpListenerContext context, HttpStatusCode statusCode, byte[] buffer, string contentType, DateTime creationTime, DateTime lastWriteTime) {
             bool result = true;
             //Adding permanent http response headers
-            context.Response.ContentType = mimeType;
+            context.Response.ContentType = contentType;
             int bytesCount = buffer.Length;
             //Adding permanent http response headers
             context.Response.ContentLength64 = bytesCount;
