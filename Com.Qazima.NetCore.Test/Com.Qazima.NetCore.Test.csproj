@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Com.Qazima.NetCore.Library.Http.Action.Database.Oracle\Com.Qazima.NetCore.Library.Http.Action.Database.Oracle.csproj" />
+    <ProjectReference Include="..\Com.Qazima.NetCore.Library.Http.Action.Database.PostgreSQL\Com.Qazima.NetCore.Library.Http.Action.Database.PostgreSQL.csproj" />
     <ProjectReference Include="..\Com.Qazima.NetCore.Library.Http\Com.Qazima.NetCore.Library.Http.csproj" />
     <ProjectReference Include="..\Com.Qazima.NetCore.Library\Com.Qazima.NetCore.Library.csproj" />
   </ItemGroup>

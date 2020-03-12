@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Database {
-    public class DatabaseAction : Action, IDatabaseAction {
+    public class Database : Action, IDatabase {
         public event EventHandler<ActionGetEventArgs> OnActionGet;
 
         public event EventHandler<ActionDeleteEventArgs<string>> OnActionDelete;
@@ -69,7 +69,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
                     using (DbDataReader reader = cmd.ExecuteReader()) {
                         while (reader.Read()) {
                             Schema schema = schemas.FirstOrDefault(s => s.Name == reader.GetString(TableQuery.IndexOfOwner));
-                            schema?.Tables.Add(new Table() { Name = reader.GetString(TableQuery.IndexOfName) });
+                            schema?.Tables.Add(new Structure.Table() { Name = reader.GetString(TableQuery.IndexOfName) });
                         }
                     }
                 }
@@ -79,7 +79,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
                     using (DbDataReader reader = cmd.ExecuteReader()) {
                         while (reader.Read()) {
                             Schema schema = schemas.FirstOrDefault(s => s.Name == reader.GetString(ColumnQuery.IndexOfTableSchemaName));
-                            Table table = schema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(ColumnQuery.IndexOfTableName));
+                            Structure.Table table = schema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(ColumnQuery.IndexOfTableName));
                             table?.Columns.Add(new Column() { Name = reader.GetString(ColumnQuery.IndexOfName), Type = reader.GetString(ColumnQuery.IndexOfDataType) });
                         }
                     }
@@ -91,7 +91,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
                         while (reader.Read()) {
                             Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyQuery.IndexOfTableSchemaName));
                             Schema primaryKeychema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyQuery.IndexOfPrimaryKeySchemaName));
-                            Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyQuery.IndexOfTableName));
+                            Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyQuery.IndexOfTableName));
                             PrimaryKey primaryKey = new PrimaryKey() { Name = reader.GetString(primaryKeyQuery.IndexOfName) };
                             primaryKeychema?.PrimaryKeys.Add(primaryKey);
                             table?.PrimaryKeys.Add(primaryKey);
@@ -105,7 +105,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
                         while (reader.Read()) {
                             Schema primaryKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfPrimaryKeySchemaName));
                             Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfTableSchemaName));
-                            Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfTableName));
+                            Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfTableName));
                             PrimaryKey primaryKey = primaryKeySchema?.PrimaryKeys.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfPrimaryKeyName));
                             Column column = table?.Columns.FirstOrDefault(c => c.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfName));
                             primaryKey?.Columns.Add(column);
@@ -121,7 +121,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
                             Schema foreignKeyShema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfForeignKeySchemaName));
                             Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfTableSchemaName));
                             PrimaryKey primaryKey = primaryKeySchema?.PrimaryKeys.FirstOrDefault(pk => pk.Name == reader.GetString(foreignKeyQuery.IndexOfReferencedConstraintName));
-                            Table table = foreignKeyShema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyQuery.IndexOfTableName));
+                            Structure.Table table = foreignKeyShema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyQuery.IndexOfTableName));
                             ForeignKey foreignKey = new ForeignKey() { Name = reader.GetString(foreignKeyQuery.IndexOfName), ReferencedConstraint = primaryKey };
                             table?.ForeignKeys.Add(foreignKey);
                             foreignKeyShema?.ForeignKeys.Add(foreignKey);
@@ -135,7 +135,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
                         while (reader.Read()) {
                             Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfTableSchemaName));
                             Schema foreignKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfForeignKeySchemaName));
-                            Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfTableName));
+                            Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfTableName));
                             ForeignKey foreignKey = tableSchema?.ForeignKeys.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfForeignKeyName));
                             Column column = table?.Columns.FirstOrDefault(c => c.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfName));
                             foreignKey?.Columns.Add(column);
@@ -147,7 +147,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
             Schemas = schemas;
         }
 
-        public bool Process(HttpListenerContext context, string rawUrl) {
+        public override bool Process(HttpListenerContext context, string rawUrl) {
             bool result = false;
             switch (context.Request.HttpMethod.ToUpper()) {
                 case "GET":
