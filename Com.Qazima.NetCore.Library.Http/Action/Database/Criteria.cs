@@ -33,44 +33,55 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
             string result = caseSensitiveColumn(columnName);
 
             switch (Operator) {
-                case CriteriaOperator.Contains:
-                    result += " like " + caseSensitiveValue("%" + Value + "%");
+                case CriteriaOperator.Contains: {
+                        result += " like " + caseSensitiveValue("%" + Value + "%");
+                    }
                     break;
-                case CriteriaOperator.Different:
-                    result += " != " + caseSensitiveValue(Value);
+                case CriteriaOperator.Different: {
+                        result += " != " + caseSensitiveValue(Value);
+                    }
                     break;
-                case CriteriaOperator.EndWith:
-                    result += " like" + caseSensitiveValue("%" + Value);
+                case CriteriaOperator.EndWith: {
+                        result += " like" + caseSensitiveValue("%" + Value);
+                    }
                     break;
-                case CriteriaOperator.Equal:
-                    result += " = " + caseSensitiveValue(Value);
+                case CriteriaOperator.Equal: {
+                        result += " = " + caseSensitiveValue(Value);
+                    }
                     break;
-                case CriteriaOperator.Greater:
-                    result += " > " + caseSensitiveValue(Value);
+                case CriteriaOperator.Greater: {
+                        result += " > " + caseSensitiveValue(Value);
+                    }
                     break;
-                case CriteriaOperator.GreaterOrEqual:
-                    result += " >= " + caseSensitiveValue(Value);
+                case CriteriaOperator.GreaterOrEqual: {
+                        result += " >= " + caseSensitiveValue(Value);
+                    }
                     break;
-                case CriteriaOperator.In:
-                    if (((IEnumerable<object>)Value).Any()) {
-                        if (((IEnumerable<object>)Value).First().GetType().IsPrimitive) {
-                            result += " in (" + caseSensitiveValue(((IEnumerable<object>)Value).ToSqlValue(",")) + ")";
-                        } else {
-                            result += " in (" + caseSensitiveValue(((IEnumerable<object>)Value).ToSqlValue(",")) + ")";
+                case CriteriaOperator.In: {
+                        if (((IEnumerable<object>)Value).Any()) {
+                            if (((IEnumerable<object>)Value).First().GetType().IsPrimitive) {
+                                result += " in (" + caseSensitiveValue(((IEnumerable<object>)Value).ToSqlValue(",")) + ")";
+                            } else {
+                                result += " in (" + caseSensitiveValue(((IEnumerable<object>)Value).ToSqlValue(",")) + ")";
+                            }
                         }
                     }
                     break;
-                case CriteriaOperator.Lower:
-                    result += " < " + caseSensitiveValue(Value);
+                case CriteriaOperator.Lower: {
+                        result += " < " + caseSensitiveValue(Value);
+                    }
                     break;
-                case CriteriaOperator.LowerOrEqual:
-                    result += " <= " + caseSensitiveValue(Value);
+                case CriteriaOperator.LowerOrEqual: {
+                        result += " <= " + caseSensitiveValue(Value);
+                    }
                     break;
-                case CriteriaOperator.StartWith:
-                    result += " like " + caseSensitiveValue(Value + "%");
+                case CriteriaOperator.StartWith: {
+                        result += " like " + caseSensitiveValue(Value + "%");
+                    }
                     break;
-                default:
-                    result += " = " + caseSensitiveValue(Value);
+                default: {
+                        result += " = " + caseSensitiveValue(Value);
+                    }
                     break;
             }
 
@@ -101,3 +112,4 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
             return result;
         }
     }
+}
