@@ -14,26 +14,16 @@ namespace Com.Qazima.NetCore.Library.Http {
 
         private HttpListener Listener { get; set; }
 
-        public int ListeningPort { get; set; }
+        private List<ServerPrefixe> ServerPrefixes { get; set; }
 
-        public string ListeningUrl { get; set; }
-
-        public Server(string url, int port) {
-            Initialize(url, port);
+        public Server(params ServerPrefixe[] serverPrefixes) {
+            ServerPrefixes = new List<ServerPrefixe>();
+            ServerPrefixes.AddRange(serverPrefixes.ToList());
         }
 
-        public Server(string url) {
-            //get an empty port
-            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
-            l.Start();
-            int port = ((IPEndPoint)l.LocalEndpoint).Port;
-            l.Stop();
-            Initialize(url, port);
-        }
+        public Server(string listeningUrl) : this(new ServerPrefixe(listeningUrl)) { }
 
-        private void Initialize(string url, int port) {
-            ListeningUrl = url;
-            ListeningPort = port;
+        private void Initialize() {
             Actions = new Dictionary<string, IAction>();
             ServerThread = new Thread(Listen);
         }
@@ -57,7 +47,10 @@ namespace Com.Qazima.NetCore.Library.Http {
 
         private void Listen() {
             Listener = new HttpListener();
-            Listener.Prefixes.Add("http://" + ListeningUrl + ":" + ListeningPort + "/");
+            foreach(ServerPrefixe serverPrefixe in ServerPrefixes) {
+                Listener.Prefixes.Add(serverPrefixe.Prefixe);
+            }
+
             Listener.Start();
             while (true) {
                 try {
