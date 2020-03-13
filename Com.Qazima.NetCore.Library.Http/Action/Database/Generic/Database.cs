@@ -8,7 +8,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 
-namespace Com.Qazima.NetCore.Library.Http.Action.Database {
+namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
     public class Database : Action, IDatabase {
         public event EventHandler<ActionGetEventArgs> OnActionGet;
 
@@ -28,11 +28,11 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
 
         public bool ExposeDataModel { get; set; }
 
-        public virtual DbCommand GetCommand(string cmdText, DbConnection dbConnection) {
+        protected virtual DbCommand GetCommand(string cmdText, DbConnection dbConnection) {
             return null;
         }
 
-        public virtual DbConnection GetConnection(string connectionString) {
+        protected virtual DbConnection GetConnection(string connectionString) {
             return null;
         }
 
@@ -57,89 +57,82 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
                 // Retrieve all schemas
                 SchemaQuery schemaQuery = SchemaQuery;
                 using (DbCommand cmd = GetCommand(schemaQuery.Query, conn)) {
-                    using (DbDataReader reader = cmd.ExecuteReader()) {
-                        while (reader.Read()) {
-                            schemas.Add(new Schema() { Name = reader.GetString(schemaQuery.IndexOfName), Owner = reader.GetString(schemaQuery.IndexOfOwner) });
-                        }
+                    using DbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read()) {
+                        schemas.Add(new Schema() { Name = reader.GetString(schemaQuery.IndexOfName), Owner = reader.GetString(schemaQuery.IndexOfOwner) });
                     }
                 }
                 // Retrieve all tables
                 TableQuery tableQuery = TableQuery;
                 using (DbCommand cmd = GetCommand(TableQuery.Query, conn)) {
-                    using (DbDataReader reader = cmd.ExecuteReader()) {
-                        while (reader.Read()) {
-                            Schema schema = schemas.FirstOrDefault(s => s.Name == reader.GetString(TableQuery.IndexOfOwner));
-                            schema?.Tables.Add(new Structure.Table() { Name = reader.GetString(TableQuery.IndexOfName) });
-                        }
+                    using DbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read()) {
+                        Schema schema = schemas.FirstOrDefault(s => s.Name == reader.GetString(TableQuery.IndexOfOwner));
+                        schema?.Tables.Add(new Structure.Table() { Name = reader.GetString(TableQuery.IndexOfName) });
                     }
                 }
                 // Retrieve all columns
                 ColumnQuery columnQuery = ColumnQuery;
                 using (DbCommand cmd = GetCommand(ColumnQuery.Query, conn)) {
-                    using (DbDataReader reader = cmd.ExecuteReader()) {
-                        while (reader.Read()) {
-                            Schema schema = schemas.FirstOrDefault(s => s.Name == reader.GetString(ColumnQuery.IndexOfTableSchemaName));
-                            Structure.Table table = schema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(ColumnQuery.IndexOfTableName));
-                            table?.Columns.Add(new Column() { Name = reader.GetString(ColumnQuery.IndexOfName), Type = reader.GetString(ColumnQuery.IndexOfDataType) });
-                        }
+                    using DbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read()) {
+                        Schema schema = schemas.FirstOrDefault(s => s.Name == reader.GetString(ColumnQuery.IndexOfTableSchemaName));
+                        Structure.Table table = schema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(ColumnQuery.IndexOfTableName));
+                        table?.Columns.Add(new Column() { Name = reader.GetString(ColumnQuery.IndexOfName), Type = reader.GetString(ColumnQuery.IndexOfDataType) });
                     }
                 }
                 // Retrieve all primary keys
                 PrimaryKeyQuery primaryKeyQuery = PrimaryKeyQuery;
                 using (DbCommand cmd = GetCommand(primaryKeyQuery.Query, conn)) {
-                    using (DbDataReader reader = cmd.ExecuteReader()) {
-                        while (reader.Read()) {
-                            Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyQuery.IndexOfTableSchemaName));
-                            Schema primaryKeychema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyQuery.IndexOfPrimaryKeySchemaName));
-                            Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyQuery.IndexOfTableName));
-                            PrimaryKey primaryKey = new PrimaryKey() { Name = reader.GetString(primaryKeyQuery.IndexOfName) };
-                            primaryKeychema?.PrimaryKeys.Add(primaryKey);
-                            table?.PrimaryKeys.Add(primaryKey);
-                        }
+                    using DbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read()) {
+                        Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyQuery.IndexOfTableSchemaName));
+                        Schema primaryKeychema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyQuery.IndexOfPrimaryKeySchemaName));
+                        Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyQuery.IndexOfTableName));
+                        PrimaryKey primaryKey = new PrimaryKey() { Name = reader.GetString(primaryKeyQuery.IndexOfName) };
+                        primaryKeychema?.PrimaryKeys.Add(primaryKey);
+                        table?.PrimaryKeys.Add(primaryKey);
                     }
                 }
                 // Retrieve all primary keys column
                 PrimaryKeyColumnsQuery primaryKeyColumnsQuery = PrimaryKeyColumnsQuery;
                 using (DbCommand cmd = GetCommand(primaryKeyColumnsQuery.Query, conn)) {
-                    using (DbDataReader reader = cmd.ExecuteReader()) {
-                        while (reader.Read()) {
-                            Schema primaryKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfPrimaryKeySchemaName));
-                            Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfTableSchemaName));
-                            Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfTableName));
-                            PrimaryKey primaryKey = primaryKeySchema?.PrimaryKeys.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfPrimaryKeyName));
-                            Column column = table?.Columns.FirstOrDefault(c => c.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfName));
-                            primaryKey?.Columns.Add(column);
-                        }
+                    using DbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read()) {
+                        Schema primaryKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfPrimaryKeySchemaName));
+                        Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfTableSchemaName));
+                        Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfTableName));
+                        PrimaryKey primaryKey = primaryKeySchema?.PrimaryKeys.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfPrimaryKeyName));
+                        Column column = table?.Columns.FirstOrDefault(c => c.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfName));
+                        primaryKey?.Columns.Add(column);
                     }
                 }
                 // Retrieve all foreign keys
                 ForeignKeyQuery foreignKeyQuery = ForeignKeyQuery;
                 using (DbCommand cmd = GetCommand(foreignKeyQuery.Query, conn)) {
-                    using (DbDataReader reader = cmd.ExecuteReader()) {
-                        while (reader.Read()) {
-                            Schema primaryKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfReferencedConstraintSchemaName));
-                            Schema foreignKeyShema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfForeignKeySchemaName));
-                            Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfTableSchemaName));
-                            PrimaryKey primaryKey = primaryKeySchema?.PrimaryKeys.FirstOrDefault(pk => pk.Name == reader.GetString(foreignKeyQuery.IndexOfReferencedConstraintName));
-                            Structure.Table table = foreignKeyShema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyQuery.IndexOfTableName));
-                            ForeignKey foreignKey = new ForeignKey() { Name = reader.GetString(foreignKeyQuery.IndexOfName), ReferencedConstraint = primaryKey };
-                            table?.ForeignKeys.Add(foreignKey);
-                            foreignKeyShema?.ForeignKeys.Add(foreignKey);
-                        }
+                    using DbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read()) {
+                        Schema primaryKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfReferencedConstraintSchemaName));
+                        Schema foreignKeyShema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfForeignKeySchemaName));
+                        Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfTableSchemaName));
+                        PrimaryKey primaryKey = primaryKeySchema?.PrimaryKeys.FirstOrDefault(pk => pk.Name == reader.GetString(foreignKeyQuery.IndexOfReferencedConstraintName));
+                        Structure.Table table = foreignKeyShema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyQuery.IndexOfTableName));
+                        ForeignKey foreignKey = new ForeignKey() { Name = reader.GetString(foreignKeyQuery.IndexOfName), ReferencedConstraint = primaryKey };
+                        table?.ForeignKeys.Add(foreignKey);
+                        foreignKeyShema?.ForeignKeys.Add(foreignKey);
                     }
                 }
                 // Retrieve all foreign keys column
                 ForeignKeyColumnsQuery foreignKeyColumnsQuery = ForeignKeyColumnsQuery;
                 using (DbCommand cmd = GetCommand(foreignKeyColumnsQuery.Query, conn)) {
-                    using (DbDataReader reader = cmd.ExecuteReader()) {
-                        while (reader.Read()) {
-                            Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfTableSchemaName));
-                            Schema foreignKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfForeignKeySchemaName));
-                            Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfTableName));
-                            ForeignKey foreignKey = tableSchema?.ForeignKeys.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfForeignKeyName));
-                            Column column = table?.Columns.FirstOrDefault(c => c.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfName));
-                            foreignKey?.Columns.Add(column);
-                        }
+                    using DbDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read()) {
+                        Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfTableSchemaName));
+                        Schema foreignKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfForeignKeySchemaName));
+                        Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfTableName));
+                        ForeignKey foreignKey = tableSchema?.ForeignKeys.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfForeignKeyName));
+                        Column column = table?.Columns.FirstOrDefault(c => c.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfName));
+                        foreignKey?.Columns.Add(column);
                     }
                 }
             }
@@ -211,7 +204,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
                     strItem = " ";
                 }
 
-                byte[] buffer = Encoding.UTF8.GetBytes(strItem.ToCharArray());
+                byte[] buffer = Encoding.UTF8.GetBytes(strItem);
                 int bytesCount = buffer.Length;
                 //Adding permanent http response headers
                 context.Response.ContentLength64 = bytesCount;
@@ -281,9 +274,5 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database {
             OnActionDelete?.Invoke(this, e);
         }
         #endregion Delete
-
-        protected bool Process404(HttpListenerContext context) {
-            return ProcessError(context, HttpStatusCode.NotFound);
-        }
     }
 }

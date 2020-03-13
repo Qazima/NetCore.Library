@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action {
     public abstract class Action : IAction {
@@ -17,7 +18,21 @@ namespace Com.Qazima.NetCore.Library.Http.Action {
 
         public Dictionary<HttpStatusCode, string> HttpStatusPages { get; }
 
-        protected bool ProcessError(HttpListenerContext context, HttpStatusCode statusCode) {
+        protected bool Process404(HttpListenerContext context) {
+            return ProcessError(context, HttpStatusCode.NotFound);
+        }
+
+        protected bool Process403(HttpListenerContext context) {
+            return ProcessError(context, HttpStatusCode.Forbidden);
+        }
+
+        protected bool Process500(HttpListenerContext context, Exception e) {
+            byte[] buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(e));
+            DateTime currDate = DateTime.Now;
+            return ProcessError(context, HttpStatusCode.InternalServerError, buffer, "application/javascript", currDate, currDate);
+        }
+
+        private bool ProcessError(HttpListenerContext context, HttpStatusCode statusCode) {
             byte[] buffer;
             DateTime creationTime;
             DateTime lastWriteTime;
@@ -41,7 +56,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action {
             return ProcessError(context, statusCode, buffer, contentType, creationTime, lastWriteTime);
         }
 
-        protected bool ProcessError(HttpListenerContext context, HttpStatusCode statusCode, byte[] buffer, string contentType, DateTime creationTime, DateTime lastWriteTime) {
+        private bool ProcessError(HttpListenerContext context, HttpStatusCode statusCode, byte[] buffer, string contentType, DateTime creationTime, DateTime lastWriteTime) {
             bool result = true;
             //Adding permanent http response headers
             context.Response.ContentType = contentType;

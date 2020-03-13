@@ -87,7 +87,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             }
 
             string strItem = JsonSerializer.Serialize(filteredItems);
-            byte[] buffer = Encoding.UTF8.GetBytes(strItem.ToCharArray());
+            byte[] buffer = Encoding.UTF8.GetBytes(strItem);
             int bytesCount = buffer.Length;
             DateTime currDate = DateTime.Now;
             //Adding permanent http response headers

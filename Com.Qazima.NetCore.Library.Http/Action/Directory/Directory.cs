@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
     public class Directory : Action{
-        public bool AllowCreate { get; set; }
+        public bool AllowPost { get; set; }
 
         public bool AllowExplore { get; set; }
 
@@ -18,20 +17,20 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
 
         public bool AllowGet { get; set; }
 
-        public bool AllowModify { get; set; }
+        public bool AllowPut { get; set; }
 
         public string Path { get; set; }
 
         public List<string> HomePages { get; set; }
 
-        public Directory(string path, List<string> homePages, bool allowCreate = false, bool allowDelete = false, bool allowExplore = false, bool allowGet = true, bool allowModify = false) {
+        public Directory(string path, List<string> homePages, bool allowPost = false, bool allowDelete = false, bool allowExplore = false, bool allowGet = true, bool allowPust = false) {
             Path = path;
             HomePages = homePages;
-            AllowCreate = allowCreate;
+            AllowPost = allowPost;
             AllowDelete = allowDelete;
             AllowExplore = allowExplore;
             AllowGet = allowGet;
-            AllowModify = allowModify;
+            AllowPut = allowPust;
         }
 
         public override bool Process(HttpListenerContext context, string rawUrl) {
@@ -74,7 +73,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
                     }
 
                     if (rawUrl.EndsWith("/")) {
-                        rawUrl += HomePages.FirstOrDefault(item => File.Exists(System.IO.Path.Combine(Path, rawUrl.Substring(0, rawUrl.Length - 1), item)));
+                        rawUrl += HomePages.FirstOrDefault(item => File.Exists(System.IO.Path.Combine(Path, rawUrl[0..^1], item)));
                     }
 
                     if (!rawUrl.StartsWith("/")) {
@@ -116,7 +115,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
         }
 
         public bool ProcessPost(HttpListenerContext context, string rawUrl) {
-            if (AllowCreate) {
+            if (AllowPost) {
                 try {
                     return true;
                 } catch (Exception e) {
@@ -128,7 +127,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
         }
 
         public bool ProcessPut(HttpListenerContext context, string rawUrl) {
-            if (AllowModify) {
+            if (AllowPut) {
                 try {
                     return true;
                 } catch (Exception e) {
@@ -137,20 +136,6 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
             }
 
             return false;
-        }
-
-        private bool Process404(HttpListenerContext context) {
-            return ProcessError(context, HttpStatusCode.NotFound);
-        }
-
-        private bool Process403(HttpListenerContext context) {
-            return ProcessError(context, HttpStatusCode.Forbidden);
-        }
-
-        private bool Process500(HttpListenerContext context, Exception e) {
-            byte[] buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(e).ToCharArray());
-            DateTime currDate = DateTime.Now;
-            return ProcessError(context, HttpStatusCode.InternalServerError, buffer, "application/javascript", currDate, currDate);
         }
     }
 }
