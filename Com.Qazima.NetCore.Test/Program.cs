@@ -7,7 +7,7 @@ using System.IO;
 namespace Com.Qazima.NetCore.Test {
     class Program {
         static void Main(string[] args) {
-            Server server = new Server("api.qazima.com", 8090);
+            Server server = new Server(new ServerPrefixe("api.qazima.com", 8090));
             int padAmount = 50;
 
             string path = Path.Combine("C:", "DEV", "html", "www");
@@ -24,7 +24,7 @@ namespace Com.Qazima.NetCore.Test {
             //server.AddAction("/ro/article", oracleTableArticleAction);
             //Console.WriteLine("[OK]");
 
-            Console.Write(("Starting on " + server.ListeningUrl + ":" + server.ListeningPort).PadRight(padAmount));
+            Console.Write(("Starting webserver").PadRight(padAmount));
             server.Start();
             Console.WriteLine("[OK]");
         }
