@@ -11,20 +11,23 @@ using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
     public class TableReadOnly : Action, ITableReadOnly {
-        public event EventHandler<ActionGetEventArgs> OnActionGet;
+        public event EventHandler<GetEventArgs> OnGet;
 
         public bool AllowGet { get; set; }
 
-        public TableReadOnly(string connectionString, string name, List<string> visibleColumns, List<string> filterableColumns) {
+        public TableReadOnly(string connectionString, string name) : this(connectionString, name, new List<string>(), new List<string>(), new Dictionary<string, OrderType>()) { }
+
+        public TableReadOnly(string connectionString, string name, List<string> visibleColumns) : this(connectionString, name, visibleColumns, new List<string>(), new Dictionary<string, OrderType>()) { }
+
+        public TableReadOnly(string connectionString, string name, List<string> visibleColumns, List<string> filterableColumns) : this(connectionString, name, visibleColumns, filterableColumns, new Dictionary<string, OrderType>()) { }
+
+        public TableReadOnly(string connectionString, string name, List<string> visibleColumns, List<string> filterableColumns, Dictionary<string, OrderType> orderColumns) {
             ConnectionString = connectionString;
             Name = name;
             FilterableColumns = filterableColumns;
+            OrderColumns = orderColumns;
             VisibleColumns = visibleColumns;
         }
-
-        public TableReadOnly(string connectionString, string name, List<string> visibleColumns) : this(connectionString, name, visibleColumns, new List<string>()) { }
-
-        public TableReadOnly(string connectionString, string name) : this(connectionString, name, new List<string>(), new List<string>()) { }
 
         public string ConnectionString { get; protected set; }
 
@@ -34,10 +37,12 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
 
         public string Name { get; protected set; }
 
+        public Dictionary<string, OrderType> OrderColumns { get; protected set; }
+
         public List<string> VisibleColumns { get; protected set; }
 
-        protected virtual void OnGetAction(ActionGetEventArgs e) {
-            OnActionGet?.Invoke(this, e);
+        protected virtual void OnGetAction(GetEventArgs e) {
+            OnGet?.Invoke(this, e);
         }
 
         public override bool Process(HttpListenerContext context, string rawUrl) {
@@ -74,12 +79,16 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
                     }
                 }
             }
+            if (OrderColumns.Any())
+            {
+                result += " ORDER BY " + string.Join(", ", OrderColumns.Select(c => c.Key + (c.Value == OrderType.Ascending ? " ASC" : " DESC")));
+            }
 
             return result;
         }
 
         protected bool ProcessGet(HttpListenerContext context) {
-            ActionGetEventArgs eventArgs = new ActionGetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
+            GetEventArgs eventArgs = new GetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
 
             bool result;
             if (AllowGet) {
@@ -93,14 +102,18 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             return result;
         }
 
-        protected bool ProcessGetSql(HttpListenerContext context, string sqlQuery) {
+        protected bool ProcessGetSql(HttpListenerContext context, string commandText) {
+            ProcessEventArgs eventArgs = new ProcessEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
             string strItem = " ";
 
             using (DbConnection conn = GetConnection(ConnectionString)) {
-                using DbCommand cmd = GetCommand(sqlQuery, conn);
+                conn.Open();
+                using DbCommand cmd = GetCommand(conn);
+                cmd.CommandText = commandText;
                 using DbDataReader reader = cmd.ExecuteReader();
                 strItem = JsonSerializer.Serialize(reader.DbDataReader2JSON());
+                conn.Close();
             }
 
             byte[] buffer = Encoding.UTF8.GetBytes(strItem);
@@ -114,15 +127,18 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
 
             context.Response.OutputStream.Write(buffer, 0, bytesCount);
             context.Response.OutputStream.Flush();
+            eventArgs.Content = buffer;
+            eventArgs.EndDate = DateTime.Now;
+            OnProcessAction(eventArgs);
 
             return result;
         }
 
-        protected virtual bool ProcessHead(HttpListenerContext context) {
+        protected bool ProcessHead(HttpListenerContext context) {
             return true;
         }
 
-        protected virtual DbCommand GetCommand(string cmdText, DbConnection dbConnection) {
+        protected virtual DbCommand GetCommand(DbConnection dbConnection) {
             return null;
         }
 

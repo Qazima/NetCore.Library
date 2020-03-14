@@ -10,6 +10,6 @@
 
         public int IndexOfOwner { get; set; }
 
-        public int IndexOfDataType { get; set; }
+        public int IndexOfType { get; set; }
     }
 }

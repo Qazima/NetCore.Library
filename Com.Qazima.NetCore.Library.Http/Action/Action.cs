@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.StaticFiles;
+﻿using Com.Qazima.NetCore.Library.Http.Action.Event;
+using Microsoft.AspNetCore.StaticFiles;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,8 +9,17 @@ using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action {
     public abstract class Action : IAction {
+        public event EventHandler<ProcessEventArgs> OnProcess;
+
+        public bool StoreInCache { get; set; }
+
         public Action() {
             HttpStatusPages = new Dictionary<HttpStatusCode, string>();
+        }
+
+        protected void OnProcessAction(ProcessEventArgs e)
+        {
+            OnProcess?.Invoke(this, e);
         }
 
         public virtual bool Process(HttpListenerContext context, string rawUrl) {

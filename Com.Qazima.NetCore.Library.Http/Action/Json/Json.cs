@@ -8,11 +8,11 @@ using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Json {
     public class Json<ListObjectType, ObjectType> : JsonReadOnly<ListObjectType, ObjectType> where ListObjectType : IList<ObjectType> {
-        public event EventHandler<ActionDeleteEventArgs<ObjectType>> OnActionDelete;
+        public event EventHandler<DeleteEventArgs<ObjectType>> OnDelete;
 
-        public event EventHandler<ActionPostEventArgs<ObjectType>> OnActionPost;
+        public event EventHandler<PostEventArgs<ObjectType>> OnPost;
 
-        public event EventHandler<ActionPutEventArgs<ObjectType>> OnActionPut;
+        public event EventHandler<PutEventArgs<ObjectType>> OnPut;
 
         public Json(ListObjectType item) : base(item) { }
 
@@ -39,20 +39,20 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return result;
         }
 
-        protected virtual void OnDeleteAction(ActionDeleteEventArgs<ObjectType> e) {
-            OnActionDelete?.Invoke(this, e);
+        protected virtual void OnDeleteAction(DeleteEventArgs<ObjectType> e) {
+            OnDelete?.Invoke(this, e);
         }
 
-        protected virtual void OnPostAction(ActionPostEventArgs<ObjectType> e) {
-            OnActionPost?.Invoke(this, e);
+        protected virtual void OnPostAction(PostEventArgs<ObjectType> e) {
+            OnPost?.Invoke(this, e);
         }
 
-        protected virtual void OnPutAction(ActionPutEventArgs<ObjectType> e) {
-            OnActionPut?.Invoke(this, e);
+        protected virtual void OnPutAction(PutEventArgs<ObjectType> e) {
+            OnPut?.Invoke(this, e);
         }
 
         protected bool ProcessPost(HttpListenerContext context) {
-            ActionPostEventArgs<ObjectType> eventArgs = new ActionPostEventArgs<ObjectType>() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
+            PostEventArgs<ObjectType> eventArgs = new PostEventArgs<ObjectType>() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
             try {
                 if (!context.Request.HasEntityBody) {
@@ -95,7 +95,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
         }
 
         protected bool ProcessPut(HttpListenerContext context) {
-            ActionPutEventArgs<ObjectType> eventArgs = new ActionPutEventArgs<ObjectType>() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
+            PutEventArgs<ObjectType> eventArgs = new PutEventArgs<ObjectType>() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
             try {
                 if (!context.Request.HasEntityBody) {
@@ -145,7 +145,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
         }
 
         protected bool ProcessDelete(HttpListenerContext context) {
-            ActionDeleteEventArgs<ObjectType> eventArgs = new ActionDeleteEventArgs<ObjectType>() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
+            DeleteEventArgs<ObjectType> eventArgs = new DeleteEventArgs<ObjectType>() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
             try {
                 if (!context.Request.HasEntityBody) {

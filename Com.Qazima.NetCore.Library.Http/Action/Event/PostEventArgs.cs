@@ -1,5 +1,5 @@
 ﻿namespace Com.Qazima.NetCore.Library.Http.Action.Event {
-    public class ActionPostEventArgs<ObjectType> : ActionGetEventArgs {
+    public class PostEventArgs<ObjectType> : GetEventArgs {
         public ObjectType New { get; set; }
     }
 }

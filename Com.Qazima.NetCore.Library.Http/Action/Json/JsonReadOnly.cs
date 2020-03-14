@@ -8,8 +8,8 @@ using System.Text;
 using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Json {
-    public class JsonReadOnly<ListObjectType, ObjectType> : IAction where ListObjectType : IEnumerable<ObjectType> {
-        public event EventHandler<ActionGetEventArgs> OnActionGet;
+    public class JsonReadOnly<ListObjectType, ObjectType> : Action, IAction where ListObjectType : IEnumerable<ObjectType> {
+        public event EventHandler<GetEventArgs> OnGet;
 
         protected ListObjectType Item { get; set; }
 
@@ -17,7 +17,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             Item = item;
         }
 
-        public virtual bool Process(HttpListenerContext context, string rawUrl) {
+        public override bool Process(HttpListenerContext context, string rawUrl) {
             bool result = false;
             switch (context.Request.HttpMethod.ToUpper()) {
                 case "GET":
@@ -31,12 +31,12 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return result;
         }
 
-        protected virtual void OnGetAction(ActionGetEventArgs e) {
-            OnActionGet?.Invoke(this, e);
+        protected virtual void OnGetAction(GetEventArgs e) {
+            OnGet?.Invoke(this, e);
         }
 
         protected bool ProcessGet(HttpListenerContext context) {
-            ActionGetEventArgs eventArgs = new ActionGetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
+            GetEventArgs eventArgs = new GetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
             try {
                 PrepareResponse(context);
@@ -76,6 +76,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
         }
 
         protected void PrepareResponse(HttpListenerContext context) {
+            ProcessEventArgs eventArgs = new ProcessEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             IEnumerable<ObjectType> filteredItems = Item;
             List<string> keys = context.Request.QueryString.AllKeys.ToList();
 
@@ -98,6 +99,9 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
 
             context.Response.OutputStream.Write(buffer, 0, bytesCount);
             context.Response.OutputStream.Flush();
+            eventArgs.Content = buffer;
+            eventArgs.EndDate = DateTime.Now;
+            OnProcessAction(eventArgs);
         }
     }
 }

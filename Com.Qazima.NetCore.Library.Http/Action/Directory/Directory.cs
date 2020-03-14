@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.StaticFiles;
+﻿using Com.Qazima.NetCore.Library.Http.Action.Event;
+using Microsoft.AspNetCore.StaticFiles;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -85,6 +86,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
                         if (!File.Exists(filePath)) {
                             return Process404(context);
                         } else {
+                            ProcessEventArgs eventArgs = new ProcessEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
                             FileInfo fileInfo = new FileInfo(filePath);
                             byte[] buffer = File.ReadAllBytes(filePath);
                             int bytesCount = buffer.Length;
@@ -101,6 +103,9 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
                             context.Response.OutputStream.Write(buffer, 0, bytesCount);
                             context.Response.OutputStream.Flush();
                             context.Response.OutputStream.Close();
+                            eventArgs.Content = buffer;
+                            eventArgs.EndDate = DateTime.Now;
+                            OnProcessAction(eventArgs);
                         }
                     } else {
                         return Process404(context);

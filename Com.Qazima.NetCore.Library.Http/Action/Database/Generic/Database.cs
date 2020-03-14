@@ -10,13 +10,13 @@ using System.Text.Json;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
     public class Database : Action, IDatabase {
-        public event EventHandler<ActionGetEventArgs> OnActionGet;
+        public event EventHandler<GetEventArgs> OnGet;
 
-        public event EventHandler<ActionDeleteEventArgs<string>> OnActionDelete;
+        public event EventHandler<DeleteEventArgs<string>> OnDelete;
 
-        public event EventHandler<ActionPostEventArgs<string>> OnActionPost;
+        public event EventHandler<PostEventArgs<string>> OnPost;
 
-        public event EventHandler<ActionPutEventArgs<string>> OnActionPut;
+        public event EventHandler<PutEventArgs<string>> OnPut;
 
         public string ConnectionString { get; set; }
 
@@ -78,7 +78,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
                     while (reader.Read()) {
                         Schema schema = schemas.FirstOrDefault(s => s.Name == reader.GetString(ColumnQuery.IndexOfTableSchemaName));
                         Structure.Table table = schema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(ColumnQuery.IndexOfTableName));
-                        table?.Columns.Add(new Column() { Name = reader.GetString(ColumnQuery.IndexOfName), Type = reader.GetString(ColumnQuery.IndexOfDataType) });
+                        table?.Columns.Add(new Column() { Name = reader.GetString(ColumnQuery.IndexOfName), Type = reader.GetString(ColumnQuery.IndexOfType) });
                     }
                 }
                 // Retrieve all primary keys
@@ -135,6 +135,7 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
                         foreignKey?.Columns.Add(column);
                     }
                 }
+                conn.Close();
             }
 
             Schemas = schemas;
@@ -186,12 +187,12 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             return result;
         }
 
-        protected virtual void OnGetAction(ActionGetEventArgs e) {
-            OnActionGet?.Invoke(this, e);
+        protected virtual void OnGetAction(GetEventArgs e) {
+            OnGet?.Invoke(this, e);
         }
 
         protected bool ProcessGetSchema(HttpListenerContext context) {
-            ActionGetEventArgs eventArgs = new ActionGetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
+            GetEventArgs eventArgs = new GetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
             try {
                 DateTime currDate = DateTime.Now;
@@ -242,8 +243,8 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             return true;
         }
 
-        protected virtual void OnPostAction(ActionPostEventArgs<string> e) {
-            OnActionPost?.Invoke(this, e);
+        protected virtual void OnPostAction(PostEventArgs<string> e) {
+            OnPost?.Invoke(this, e);
         }
         #endregion Post
 
@@ -256,8 +257,8 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             return true;
         }
 
-        protected virtual void OnPutAction(ActionPutEventArgs<string> e) {
-            OnActionPut?.Invoke(this, e);
+        protected virtual void OnPutAction(PutEventArgs<string> e) {
+            OnPut?.Invoke(this, e);
         }
         #endregion Put
 
@@ -270,8 +271,8 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             return true;
         }
 
-        protected virtual void OnDeleteAction(ActionDeleteEventArgs<string> e) {
-            OnActionDelete?.Invoke(this, e);
+        protected virtual void OnDeleteAction(DeleteEventArgs<string> e) {
+            OnDelete?.Invoke(this, e);
         }
         #endregion Delete
     }
