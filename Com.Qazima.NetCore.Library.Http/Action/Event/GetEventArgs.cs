@@ -2,7 +2,7 @@
 using System.Net;
 
 namespace Com.Qazima.NetCore.Library.Http.Action.Event {
-    public class ActionGetEventArgs : EventArgs {
+    public class GetEventArgs : EventArgs {
         public Uri AskedUrl { get; set; }
 
         public DateTime AskedDate { get; set; }
