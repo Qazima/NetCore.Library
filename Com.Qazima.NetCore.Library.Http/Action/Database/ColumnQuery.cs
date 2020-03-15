@@ -1,5 +1,7 @@
-﻿namespace Com.Qazima.NetCore.Library.Http.Action.Database {
-    public struct ColumnQuery {
+﻿namespace Com.Qazima.NetCore.Library.Http.Action.Database
+{
+    public struct ColumnQuery
+    {
         public string Query { get; set; }
 
         public int IndexOfTableSchemaName { get; set; }

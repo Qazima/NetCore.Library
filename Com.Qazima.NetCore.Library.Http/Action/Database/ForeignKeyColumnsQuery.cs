@@ -1,5 +1,7 @@
-﻿namespace Com.Qazima.NetCore.Library.Http.Action.Database {
-    public struct ForeignKeyColumnsQuery {
+﻿namespace Com.Qazima.NetCore.Library.Http.Action.Database
+{
+    public struct ForeignKeyColumnsQuery
+    {
         public string Query { get; set; }
 
         public int IndexOfForeignKeySchemaName { get; set; }

@@ -7,19 +7,24 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 
-namespace Com.Qazima.NetCore.Library.Http.Action.Json {
-    public class JsonReadOnly<ListObjectType, ObjectType> : Action, IAction where ListObjectType : IEnumerable<ObjectType> {
+namespace Com.Qazima.NetCore.Library.Http.Action.Json
+{
+    public class JsonReadOnly<ListObjectType, ObjectType> : Action, IAction where ListObjectType : IEnumerable<ObjectType>
+    {
         public event EventHandler<GetEventArgs> OnGet;
 
         protected ListObjectType Item { get; set; }
 
-        public JsonReadOnly(ListObjectType item) {
+        public JsonReadOnly(ListObjectType item)
+        {
             Item = item;
         }
 
-        public override bool Process(HttpListenerContext context, string rawUrl) {
+        public override bool Process(HttpListenerContext context, string rawUrl)
+        {
             bool result = false;
-            switch (context.Request.HttpMethod.ToUpper()) {
+            switch (context.Request.HttpMethod.ToUpper())
+            {
                 case "GET":
                     result = ProcessGet(context);
                     break;
@@ -31,16 +36,21 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return result;
         }
 
-        protected virtual void OnGetAction(GetEventArgs e) {
+        protected virtual void OnGetAction(GetEventArgs e)
+        {
             OnGet?.Invoke(this, e);
         }
 
-        protected bool ProcessGet(HttpListenerContext context) {
+        protected bool ProcessGet(HttpListenerContext context)
+        {
             GetEventArgs eventArgs = new GetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
-            try {
+            try
+            {
                 PrepareResponse(context);
-            } catch {
+            }
+            catch
+            {
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 result = false;
             }
@@ -52,8 +62,10 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return result;
         }
 
-        protected bool ProcessHead(HttpListenerContext context) {
-            try {
+        protected bool ProcessHead(HttpListenerContext context)
+        {
+            try
+            {
                 DateTime currDate = DateTime.Now;
                 //Adding permanent http response headers
                 context.Response.ContentType = "application/json";
@@ -67,7 +79,9 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
 
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
                 context.Response.OutputStream.Flush();
-            } catch {
+            }
+            catch
+            {
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 return false;
             }
@@ -75,14 +89,17 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Json {
             return true;
         }
 
-        protected void PrepareResponse(HttpListenerContext context) {
+        protected void PrepareResponse(HttpListenerContext context)
+        {
             ProcessEventArgs eventArgs = new ProcessEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             IEnumerable<ObjectType> filteredItems = Item;
             List<string> keys = context.Request.QueryString.AllKeys.ToList();
 
-            foreach (string key in keys) {
+            foreach (string key in keys)
+            {
                 PropertyInfo property = Item.First().GetType().GetProperty(key);
-                if (property != null) {
+                if (property != null)
+                {
                     filteredItems = filteredItems.Where(item => property.GetValue(item, null).ToString().Equals(Encoding.UTF8.GetString(Encoding.Default.GetBytes(context.Request.QueryString[key])), StringComparison.InvariantCultureIgnoreCase));
                 }
             }

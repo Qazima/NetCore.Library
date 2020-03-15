@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Text.Json;
 
-namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
-    public class Directory : Action{
+namespace Com.Qazima.NetCore.Library.Http.Action.Directory
+{
+    public class Directory : Action
+    {
         public bool AllowPost { get; set; }
 
         public bool AllowExplore { get; set; }
@@ -24,7 +24,8 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
 
         public List<string> HomePages { get; set; }
 
-        public Directory(string path, List<string> homePages, bool allowPost = false, bool allowDelete = false, bool allowExplore = false, bool allowGet = true, bool allowPust = false) {
+        public Directory(string path, List<string> homePages, bool allowPost = false, bool allowDelete = false, bool allowExplore = false, bool allowGet = true, bool allowPust = false)
+        {
             Path = path;
             HomePages = homePages;
             AllowPost = allowPost;
@@ -34,9 +35,11 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
             AllowPut = allowPust;
         }
 
-        public override bool Process(HttpListenerContext context, string rawUrl) {
+        public override bool Process(HttpListenerContext context, string rawUrl)
+        {
             bool result = false;
-            switch (context.Request.HttpMethod.ToUpper()) {
+            switch (context.Request.HttpMethod.ToUpper())
+            {
                 case "GET":
                     result = ProcessGet(context, rawUrl);
                     break;
@@ -54,11 +57,16 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
             return result;
         }
 
-        public bool ProcessDelete(HttpListenerContext context, string rawUrl) {
-            if (AllowDelete) {
-                try {
+        public bool ProcessDelete(HttpListenerContext context, string rawUrl)
+        {
+            if (AllowDelete)
+            {
+                try
+                {
                     return true;
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     return Process500(context, e);
                 }
             }
@@ -66,33 +74,44 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
             return false;
         }
 
-        public bool ProcessGet(HttpListenerContext context, string rawUrl) {
-            if (AllowGet) {
-                try {
-                    if (!rawUrl.Contains(".") && !rawUrl.EndsWith("/")) {
+        public bool ProcessGet(HttpListenerContext context, string rawUrl)
+        {
+            if (AllowGet)
+            {
+                try
+                {
+                    if (!rawUrl.Contains(".") && !rawUrl.EndsWith("/"))
+                    {
                         rawUrl += "/";
                     }
 
-                    if (rawUrl.EndsWith("/")) {
+                    if (rawUrl.EndsWith("/"))
+                    {
                         rawUrl += HomePages.FirstOrDefault(item => File.Exists(System.IO.Path.Combine(Path, rawUrl[0..^1], item)));
                     }
 
-                    if (!rawUrl.StartsWith("/")) {
+                    if (!rawUrl.StartsWith("/"))
+                    {
                         rawUrl = "/" + rawUrl;
                     }
 
-                    if (!string.IsNullOrWhiteSpace(rawUrl)) {
+                    if (!string.IsNullOrWhiteSpace(rawUrl))
+                    {
                         string filePath = System.IO.Path.Combine(Path, rawUrl.Substring(1, rawUrl.Length - 1));
-                        if (!File.Exists(filePath)) {
+                        if (!File.Exists(filePath))
+                        {
                             return Process404(context);
-                        } else {
+                        }
+                        else
+                        {
                             ProcessEventArgs eventArgs = new ProcessEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
                             FileInfo fileInfo = new FileInfo(filePath);
                             byte[] buffer = File.ReadAllBytes(filePath);
                             int bytesCount = buffer.Length;
                             //Adding permanent http response headers
                             string contentType;
-                            if (!new FileExtensionContentTypeProvider().TryGetContentType(filePath, out contentType)) {
+                            if (!new FileExtensionContentTypeProvider().TryGetContentType(filePath, out contentType))
+                            {
                                 contentType = "application/octet-stream";
                             }
                             context.Response.ContentType = contentType;
@@ -107,11 +126,15 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
                             eventArgs.EndDate = DateTime.Now;
                             OnProcessAction(eventArgs);
                         }
-                    } else {
+                    }
+                    else
+                    {
                         return Process404(context);
                     }
                     return true;
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     return Process500(context, e);
                 }
             }
@@ -119,11 +142,16 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
             return true;
         }
 
-        public bool ProcessPost(HttpListenerContext context, string rawUrl) {
-            if (AllowPost) {
-                try {
+        public bool ProcessPost(HttpListenerContext context, string rawUrl)
+        {
+            if (AllowPost)
+            {
+                try
+                {
                     return true;
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     return Process500(context, e);
                 }
             }
@@ -131,11 +159,16 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Directory {
             return false;
         }
 
-        public bool ProcessPut(HttpListenerContext context, string rawUrl) {
-            if (AllowPut) {
-                try {
+        public bool ProcessPut(HttpListenerContext context, string rawUrl)
+        {
+            if (AllowPut)
+            {
+                try
+                {
                     return true;
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     return Process500(context, e);
                 }
             }

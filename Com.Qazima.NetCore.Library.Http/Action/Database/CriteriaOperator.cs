@@ -1,5 +1,7 @@
-﻿namespace Com.Qazima.NetCore.Library.Http.Action.Database {
-    public enum CriteriaOperator {
+﻿namespace Com.Qazima.NetCore.Library.Http.Action.Database
+{
+    public enum CriteriaOperator
+    {
         Contains,
         Different,
         EndWith,

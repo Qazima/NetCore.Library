@@ -8,8 +8,10 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 
-namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
-    public class Database : Action, IDatabase {
+namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic
+{
+    public class Database : Action
+    {
         public event EventHandler<GetEventArgs> OnGet;
 
         public event EventHandler<DeleteEventArgs<string>> OnDelete;
@@ -28,11 +30,13 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
 
         public bool ExposeDataModel { get; set; }
 
-        protected virtual DbCommand GetCommand(string cmdText, DbConnection dbConnection) {
+        protected virtual DbCommand GetCommand(string cmdText, DbConnection dbConnection)
+        {
             return null;
         }
 
-        protected virtual DbConnection GetConnection(string connectionString) {
+        protected virtual DbConnection GetConnection(string connectionString)
+        {
             return null;
         }
 
@@ -50,32 +54,40 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
 
         public virtual ForeignKeyColumnsQuery ForeignKeyColumnsQuery { get; }
 
-        public void FetchSchemas() {
+        public void FetchSchemas()
+        {
             List<Schema> schemas = new List<Schema>();
-            using (DbConnection conn = GetConnection(ConnectionString)) {
+            using (DbConnection conn = GetConnection(ConnectionString))
+            {
                 conn.Open();
                 // Retrieve all schemas
                 SchemaQuery schemaQuery = SchemaQuery;
-                using (DbCommand cmd = GetCommand(schemaQuery.Query, conn)) {
+                using (DbCommand cmd = GetCommand(schemaQuery.Query, conn))
+                {
                     using DbDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read()) {
+                    while (reader.Read())
+                    {
                         schemas.Add(new Schema() { Name = reader.GetString(schemaQuery.IndexOfName), Owner = reader.GetString(schemaQuery.IndexOfOwner) });
                     }
                 }
                 // Retrieve all tables
                 TableQuery tableQuery = TableQuery;
-                using (DbCommand cmd = GetCommand(TableQuery.Query, conn)) {
+                using (DbCommand cmd = GetCommand(TableQuery.Query, conn))
+                {
                     using DbDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read()) {
+                    while (reader.Read())
+                    {
                         Schema schema = schemas.FirstOrDefault(s => s.Name == reader.GetString(TableQuery.IndexOfOwner));
                         schema?.Tables.Add(new Structure.Table() { Name = reader.GetString(TableQuery.IndexOfName) });
                     }
                 }
                 // Retrieve all columns
                 ColumnQuery columnQuery = ColumnQuery;
-                using (DbCommand cmd = GetCommand(ColumnQuery.Query, conn)) {
+                using (DbCommand cmd = GetCommand(ColumnQuery.Query, conn))
+                {
                     using DbDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read()) {
+                    while (reader.Read())
+                    {
                         Schema schema = schemas.FirstOrDefault(s => s.Name == reader.GetString(ColumnQuery.IndexOfTableSchemaName));
                         Structure.Table table = schema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(ColumnQuery.IndexOfTableName));
                         table?.Columns.Add(new Column() { Name = reader.GetString(ColumnQuery.IndexOfName), Type = reader.GetString(ColumnQuery.IndexOfType) });
@@ -83,9 +95,11 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
                 }
                 // Retrieve all primary keys
                 PrimaryKeyQuery primaryKeyQuery = PrimaryKeyQuery;
-                using (DbCommand cmd = GetCommand(primaryKeyQuery.Query, conn)) {
+                using (DbCommand cmd = GetCommand(primaryKeyQuery.Query, conn))
+                {
                     using DbDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read()) {
+                    while (reader.Read())
+                    {
                         Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyQuery.IndexOfTableSchemaName));
                         Schema primaryKeychema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyQuery.IndexOfPrimaryKeySchemaName));
                         Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyQuery.IndexOfTableName));
@@ -96,9 +110,11 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
                 }
                 // Retrieve all primary keys column
                 PrimaryKeyColumnsQuery primaryKeyColumnsQuery = PrimaryKeyColumnsQuery;
-                using (DbCommand cmd = GetCommand(primaryKeyColumnsQuery.Query, conn)) {
+                using (DbCommand cmd = GetCommand(primaryKeyColumnsQuery.Query, conn))
+                {
                     using DbDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read()) {
+                    while (reader.Read())
+                    {
                         Schema primaryKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfPrimaryKeySchemaName));
                         Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfTableSchemaName));
                         Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(primaryKeyColumnsQuery.IndexOfTableName));
@@ -109,9 +125,11 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
                 }
                 // Retrieve all foreign keys
                 ForeignKeyQuery foreignKeyQuery = ForeignKeyQuery;
-                using (DbCommand cmd = GetCommand(foreignKeyQuery.Query, conn)) {
+                using (DbCommand cmd = GetCommand(foreignKeyQuery.Query, conn))
+                {
                     using DbDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read()) {
+                    while (reader.Read())
+                    {
                         Schema primaryKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfReferencedConstraintSchemaName));
                         Schema foreignKeyShema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfForeignKeySchemaName));
                         Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyQuery.IndexOfTableSchemaName));
@@ -124,9 +142,11 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
                 }
                 // Retrieve all foreign keys column
                 ForeignKeyColumnsQuery foreignKeyColumnsQuery = ForeignKeyColumnsQuery;
-                using (DbCommand cmd = GetCommand(foreignKeyColumnsQuery.Query, conn)) {
+                using (DbCommand cmd = GetCommand(foreignKeyColumnsQuery.Query, conn))
+                {
                     using DbDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read()) {
+                    while (reader.Read())
+                    {
                         Schema tableSchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfTableSchemaName));
                         Schema foreignKeySchema = schemas.FirstOrDefault(s => s.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfForeignKeySchemaName));
                         Structure.Table table = tableSchema?.Tables.FirstOrDefault(t => t.Name == reader.GetString(foreignKeyColumnsQuery.IndexOfTableName));
@@ -141,9 +161,11 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             Schemas = schemas;
         }
 
-        public override bool Process(HttpListenerContext context, string rawUrl) {
+        public override bool Process(HttpListenerContext context, string rawUrl)
+        {
             bool result = false;
-            switch (context.Request.HttpMethod.ToUpper()) {
+            switch (context.Request.HttpMethod.ToUpper())
+            {
                 case "GET":
                     result = ProcessGet(context, rawUrl);
                     break;
@@ -166,41 +188,56 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
         }
 
         #region Get
-        public bool ProcessGet(HttpListenerContext context, string rawUrl) {
-            if (rawUrl.EndsWith("/")) {
+        public bool ProcessGet(HttpListenerContext context, string rawUrl)
+        {
+            if (rawUrl.EndsWith("/"))
+            {
                 rawUrl = rawUrl.Substring(0, rawUrl.Length - 1);
             }
 
             bool result;
-            if (string.IsNullOrWhiteSpace(rawUrl)) {
+            if (string.IsNullOrWhiteSpace(rawUrl))
+            {
                 result = ProcessGetSchema(context);
-            } else if (rawUrl.ToLower().StartsWith("/" + SqlUrl + "/")) {
+            }
+            else if (rawUrl.ToLower().StartsWith("/" + SqlUrl + "/"))
+            {
                 result = ProcessGetSql(context, rawUrl.Substring(("/" + SqlUrl + "/").Length));
-            } else if (rawUrl.ToLower().StartsWith("/" + TableUrl + "/")) {
+            }
+            else if (rawUrl.ToLower().StartsWith("/" + TableUrl + "/"))
+            {
                 string[] args = rawUrl.Substring(("/" + TableUrl + "/").Length).Split('/');
                 string objectName = args[args.Length - 1];
                 string catalogName = args.Length <= 1 ? "" : args[0];
                 result = ProcessGetTable(context, objectName, catalogName);
-            } else {
+            }
+            else
+            {
                 result = Process404(context);
             }
             return result;
         }
 
-        protected virtual void OnGetAction(GetEventArgs e) {
+        protected virtual void OnGetAction(GetEventArgs e)
+        {
             OnGet?.Invoke(this, e);
         }
 
-        protected bool ProcessGetSchema(HttpListenerContext context) {
+        protected bool ProcessGetSchema(HttpListenerContext context)
+        {
             GetEventArgs eventArgs = new GetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
-            try {
+            try
+            {
                 DateTime currDate = DateTime.Now;
                 string strItem = null;
-                if (ExposeDataModel) {
+                if (ExposeDataModel)
+                {
                     context.Response.ContentType = "application/json";
                     strItem = JsonSerializer.Serialize(Schemas);
-                } else {
+                }
+                else
+                {
                     context.Response.ContentType = "text/plain";
                     strItem = " ";
                 }
@@ -213,7 +250,9 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
                 context.Response.AddHeader("Last-Modified", currDate.ToString("r"));
                 context.Response.OutputStream.Write(buffer, 0, bytesCount);
                 context.Response.OutputStream.Flush();
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 result = false;
             }
@@ -225,53 +264,64 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             return result;
         }
 
-        protected virtual bool ProcessGetSql(HttpListenerContext context, string sqlQuery) {
+        protected virtual bool ProcessGetSql(HttpListenerContext context, string sqlQuery)
+        {
             return true;
         }
 
-        protected virtual bool ProcessGetTable(HttpListenerContext context, string objectName, string catalogName) {
+        protected virtual bool ProcessGetTable(HttpListenerContext context, string objectName, string catalogName)
+        {
             return true;
         }
         #endregion Get
 
         #region Post
-        public virtual bool ProcessPost(HttpListenerContext context, string rawUrl) {
+        public virtual bool ProcessPost(HttpListenerContext context, string rawUrl)
+        {
             return true;
         }
 
-        protected virtual bool ProcessPostTable(HttpListenerContext context, string objectName, string catalogName) {
+        protected virtual bool ProcessPostTable(HttpListenerContext context, string objectName, string catalogName)
+        {
             return true;
         }
 
-        protected virtual void OnPostAction(PostEventArgs<string> e) {
+        protected virtual void OnPostAction(PostEventArgs<string> e)
+        {
             OnPost?.Invoke(this, e);
         }
         #endregion Post
 
         #region Put
-        public virtual bool ProcessPut(HttpListenerContext context, string rawUrl) {
+        public virtual bool ProcessPut(HttpListenerContext context, string rawUrl)
+        {
             return true;
         }
 
-        protected virtual bool ProcessPutTable(HttpListenerContext context, string objectName, string catalogName) {
+        protected virtual bool ProcessPutTable(HttpListenerContext context, string objectName, string catalogName)
+        {
             return true;
         }
 
-        protected virtual void OnPutAction(PutEventArgs<string> e) {
+        protected virtual void OnPutAction(PutEventArgs<string> e)
+        {
             OnPut?.Invoke(this, e);
         }
         #endregion Put
 
         #region Delete
-        public virtual bool ProcessDelete(HttpListenerContext context, string rawUrl) {
+        public virtual bool ProcessDelete(HttpListenerContext context, string rawUrl)
+        {
             return true;
         }
 
-        protected virtual bool ProcessDeleteTable(HttpListenerContext context, string objectName, string catalogName) {
+        protected virtual bool ProcessDeleteTable(HttpListenerContext context, string objectName, string catalogName)
+        {
             return true;
         }
 
-        protected virtual void OnDeleteAction(DeleteEventArgs<string> e) {
+        protected virtual void OnDeleteAction(DeleteEventArgs<string> e)
+        {
             OnDelete?.Invoke(this, e);
         }
         #endregion Delete

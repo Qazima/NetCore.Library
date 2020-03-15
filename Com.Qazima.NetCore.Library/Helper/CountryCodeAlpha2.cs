@@ -1,5 +1,7 @@
-﻿namespace Com.Qazima.NetCore.Library.Helper {
-    public enum CountryCodeAlpha2 {
+﻿namespace Com.Qazima.NetCore.Library.Helper
+{
+    public enum CountryCodeAlpha2
+    {
         AF = 4,
         AL = 8,
         AQ = 10,

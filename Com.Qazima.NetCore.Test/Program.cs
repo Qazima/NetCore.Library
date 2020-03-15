@@ -1,14 +1,17 @@
 ﻿using Com.Qazima.NetCore.Library.Http;
-using d=Com.Qazima.NetCore.Library.Http.Action.Directory;
+using d = Com.Qazima.NetCore.Library.Http.Action.Directory;
 using orcl = Com.Qazima.NetCore.Library.Http.Action.Database.Oracle;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Com.Qazima.NetCore.Library.Http.Action.Database.Generic;
 
-namespace Com.Qazima.NetCore.Test {
-    class Program {
-        static void Main(string[] args) {
+namespace Com.Qazima.NetCore.Test
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
             Server server = new Server(true, 20, new ServerPrefixe("127.0.0.1", 8090));
             int padAmount = 50;
 

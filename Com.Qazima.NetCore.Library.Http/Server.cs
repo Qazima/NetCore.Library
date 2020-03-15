@@ -1,11 +1,8 @@
-﻿using Com.Qazima.NetCore.Library.Http.Action;
-using Com.Qazima.NetCore.Library.Http.Cache;
+﻿using Com.Qazima.NetCore.Library.Http.Cache;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 
 namespace Com.Qazima.NetCore.Library.Http

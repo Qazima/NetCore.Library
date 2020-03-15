@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace Com.Qazima.NetCore.Library.Http.Action.Database.Structure {
-    public class Table {
-        public Table() {
+namespace Com.Qazima.NetCore.Library.Http.Action.Database.Structure
+{
+    public class Table
+    {
+        public Table()
+        {
             Columns = new List<Column>();
             ForeignKeys = new List<ForeignKey>();
             PrimaryKeys = new List<PrimaryKey>();
@@ -20,7 +23,8 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Structure {
 
         public string Type { get; set; }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return "Table " + Name + ": " + Columns.Count + " column" + (Columns.Count > 1 ? "s" : "");
         }
     }

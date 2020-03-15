@@ -9,8 +9,10 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 
-namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
-    public class TableReadOnly : Action, ITableReadOnly {
+namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic
+{
+    public class TableReadOnly : Action
+    {
         public event EventHandler<GetEventArgs> OnGet;
 
         public bool AllowGet { get; set; }
@@ -21,7 +23,8 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
 
         public TableReadOnly(string connectionString, string name, List<string> visibleColumns, List<string> filterableColumns) : this(connectionString, name, visibleColumns, filterableColumns, new Dictionary<string, OrderType>()) { }
 
-        public TableReadOnly(string connectionString, string name, List<string> visibleColumns, List<string> filterableColumns, Dictionary<string, OrderType> orderColumns) {
+        public TableReadOnly(string connectionString, string name, List<string> visibleColumns, List<string> filterableColumns, Dictionary<string, OrderType> orderColumns)
+        {
             ConnectionString = connectionString;
             Name = name;
             FilterableColumns = filterableColumns;
@@ -41,13 +44,16 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
 
         public List<string> VisibleColumns { get; protected set; }
 
-        protected virtual void OnGetAction(GetEventArgs e) {
+        protected virtual void OnGetAction(GetEventArgs e)
+        {
             OnGet?.Invoke(this, e);
         }
 
-        public override bool Process(HttpListenerContext context, string rawUrl) {
+        public override bool Process(HttpListenerContext context, string rawUrl)
+        {
             bool result = false;
-            switch (context.Request.HttpMethod.ToUpper()) {
+            switch (context.Request.HttpMethod.ToUpper())
+            {
                 case "GET":
                     result = ProcessGet(context);
                     break;
@@ -59,21 +65,31 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             return result;
         }
 
-        protected string GetQuery(NameValueCollection queryString) {
+        protected string GetQuery(NameValueCollection queryString)
+        {
             string result = "SELECT " + (VisibleColumns.Any() ? string.Join(", ", VisibleColumns) : "*") + " FROM ";
-            if (!string.IsNullOrEmpty(CatalogName)) {
+            if (!string.IsNullOrEmpty(CatalogName))
+            {
                 result += CatalogName + ".";
             }
             result += Name + " WHERE 1 = 1";
-            foreach (string name in queryString) {
-                if (!FilterableColumns.Any() || FilterableColumns.Contains(name)) {
-                    if (Criteria.TryParse(queryString[name], out Criteria criteria)) {
+            foreach (string name in queryString)
+            {
+                if (!FilterableColumns.Any() || FilterableColumns.Contains(name))
+                {
+                    if (Criteria.TryParse(queryString[name], out Criteria criteria))
+                    {
                         result += " AND " + criteria.toSqlWhereClause(name);
-                    } else {
+                    }
+                    else
+                    {
                         result += " AND " + name;
-                        if (queryString[name].Contains("%")) {
+                        if (queryString[name].Contains("%"))
+                        {
                             result += " LIKE '" + queryString[name] + "'";
-                        } else {
+                        }
+                        else
+                        {
                             result += "=" + queryString[name].ToSqlValue();
                         }
                     }
@@ -87,13 +103,17 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             return result;
         }
 
-        protected bool ProcessGet(HttpListenerContext context) {
+        protected bool ProcessGet(HttpListenerContext context)
+        {
             GetEventArgs eventArgs = new GetEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
 
             bool result;
-            if (AllowGet) {
+            if (AllowGet)
+            {
                 result = ProcessGetSql(context, GetQuery(context.Request.QueryString));
-            } else {
+            }
+            else
+            {
                 result = Process403(context);
             }
             eventArgs.EndDate = DateTime.Now;
@@ -102,12 +122,14 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             return result;
         }
 
-        protected bool ProcessGetSql(HttpListenerContext context, string commandText) {
+        protected bool ProcessGetSql(HttpListenerContext context, string commandText)
+        {
             ProcessEventArgs eventArgs = new ProcessEventArgs() { AskedDate = DateTime.Now, AskedUrl = context.Request.Url };
             bool result = true;
             string strItem = " ";
 
-            using (DbConnection conn = GetConnection(ConnectionString)) {
+            using (DbConnection conn = GetConnection(ConnectionString))
+            {
                 conn.Open();
                 using DbCommand cmd = GetCommand(conn);
                 cmd.CommandText = commandText;
@@ -134,15 +156,18 @@ namespace Com.Qazima.NetCore.Library.Http.Action.Database.Generic {
             return result;
         }
 
-        protected bool ProcessHead(HttpListenerContext context) {
+        protected bool ProcessHead(HttpListenerContext context)
+        {
             return true;
         }
 
-        protected virtual DbCommand GetCommand(DbConnection dbConnection) {
+        protected virtual DbCommand GetCommand(DbConnection dbConnection)
+        {
             return null;
         }
 
-        protected virtual DbConnection GetConnection(string connectionString) {
+        protected virtual DbConnection GetConnection(string connectionString)
+        {
             return null;
         }
     }

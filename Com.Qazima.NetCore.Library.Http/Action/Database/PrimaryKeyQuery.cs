@@ -1,5 +1,7 @@
-﻿namespace Com.Qazima.NetCore.Library.Http.Action.Database {
-    public struct PrimaryKeyQuery {
+﻿namespace Com.Qazima.NetCore.Library.Http.Action.Database
+{
+    public struct PrimaryKeyQuery
+    {
         public string Query { get; set; }
 
         public int IndexOfPrimaryKeySchemaName { get; set; }

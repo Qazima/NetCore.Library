@@ -1,5 +1,7 @@
-﻿namespace Com.Qazima.NetCore.Library.Helper {
-    public enum SpecialDate {
+﻿namespace Com.Qazima.NetCore.Library.Helper
+{
+    public enum SpecialDate
+    {
         Christmas,
         ChristmasEve,
         Easter,
